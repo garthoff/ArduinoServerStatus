@@ -1,5 +1,6 @@
 /*
  * Created May 2012
+ * @author DietCoder https://github.com/DietCoder
  */
 
 #include <SPI.h>

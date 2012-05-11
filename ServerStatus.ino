@@ -176,6 +176,8 @@ void loop()
     Serial.print(" HTTP status");
     Serial.println();
     
+    // update the status of this server
+    // base on the response code
     if(lastHTTPStatusCode == 200)
         setServerNStatus(GREEN_STATE,currentServer);
     else
@@ -191,16 +193,13 @@ void loop()
     Serial.println("disconnecting.");
     client.stop();
     
-    // update the final status of this server
-    // base on the response code
-    
     // next server
     if((currentServer+1) > numServers)
       currentServer = startServer;
     else
       currentServer = currentServer + 1;
     
-    // retry
+    // after 60 sec sleep
     Serial.println("Sleep...");
     delay(60000);
     Serial.println("Awake...");

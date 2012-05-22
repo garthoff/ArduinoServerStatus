@@ -1,5 +1,7 @@
 Display url up/down status with LEDs on an Arduino Uno board.
 
+[![](http://farm8.staticflickr.com/7076/7246297858_cc4e21631d_z.jpg)](http://farm8.staticflickr.com/7076/7246297858_cc4e21631d_z.jpg)
+
 Parts
 
 Arduino Uno
@@ -12,5 +14,3 @@ Wires
 LEDs
 Resistors
 BreadBoard
-
-[![](http://farm8.staticflickr.com/7076/7246297858_cc4e21631d_z.jpg)](http://farm8.staticflickr.com/7076/7246297858_cc4e21631d_z.jpg)

@@ -12,3 +12,5 @@ Wires
 LEDs
 Resistors
 BreadBoard
+
+[![](http://http://farm8.staticflickr.com/7076/7246297858_cc4e21631d_b.jpg)](http://farm8.staticflickr.com/7076/7246297858_cc4e21631d_b.jpg)

@@ -20,13 +20,15 @@ char* servers[] = {"arduino.cc",
 char* serverUrlPaths[] = {"/en/Main/FAQ",
                           "/",
                           "/"};
-                          
+
 #define server1RedPin   2
 #define server1GreenPin 3
 #define server2RedPin   4
 #define server2GreenPin 5
 #define server3RedPin   6
 #define server3GreenPin 7
+
+unsigned int sleepTimeBetweenServerConnectionsMs = 60000;
 
 // --- END CONFIG ---
 
@@ -37,6 +39,7 @@ EthernetClient client;
 
 // reference constants
 #define NUM_SERVERS 3
+
 #define LED_RED_STATE B0
 #define LED_GREEN_STATE B1
 #define LED_OFF_STATE B10
@@ -73,7 +76,7 @@ void setup() {
   if (Ethernet.begin(mac) == 0) {
     Serial.println("Failed to configure Ethernet using DHCP");
     
-    // update ui
+    // update leds
     setAllServersToStatus(LED_RED_STATE);
     
     // fail
@@ -91,24 +94,13 @@ void setup() {
 }
 
 void setupServerNRequest(int serverNumber) {
-  //IPAddress server;
-  int serversIndex;
-  
-  switch (serverNumber) {
-    case 1:
-      serversIndex = 0;
-      break;
-    case 2:
-      serversIndex = 1;
-      break;
-    case 3:
-      serversIndex = 2;
-      break;
-    default:
-      Serial.println("Invalid server passed to setupServerNRequest");
+  if(serverNumber > NUM_SERVERS) {
+    Serial.println("Invalid server passed to setupServerNRequest");
       Serial.println(serverNumber);
       return;
   }
+  
+  int serversIndex = serverNumber - 1;
   
   if (client.connect(servers[serversIndex], 80)) {
     Serial.print("Connected to Server ");
@@ -145,7 +137,7 @@ void loop()
       
       if(c == '\n' || cHTTPCharInLinePosition == HTTPCharReadPerLineLimit) {
         
-        // Parse HTTP status code - expected format HTTP/d.d ddd.*\n
+        // Parse HTTP status code - expected format HTTP/... ddd.*\n
         if(lastLineString.indexOf("HTTP/") == 0 && cHTTPCharInLinePosition > 12) {
             unsigned int httpStatusCodeLength = 3;
             unsigned int startHTTPCode = 12-httpStatusCodeLength;
@@ -194,13 +186,15 @@ void loop()
     client.stop();
     
     // next server
-    currentServer = (currentServer + 1) % NUM_SERVERS;
+    currentServer = (currentServer + 1) % (NUM_SERVERS+1);
     currentServer = currentServer == 0 ? 1 : currentServer;   
     
     // after delay
-    Serial.println("Sleep...");
-    delay(60000);
-    Serial.println("Awake...");
+    Serial.print("Sleeping ");
+    Serial.print(sleepTimeBetweenServerConnectionsMs);
+    Serial.println("ms ...");
+    delay(sleepTimeBetweenServerConnectionsMs);
+    Serial.println("... Awake");
     setupServerNRequest(currentServer);
   }
 }
@@ -210,9 +204,9 @@ void setAllServersToStatus(byte state) {
       setServerNStatus(state,i);
 }
 
-void setServerNStatus(byte state, int serverNumber) {
-  int greenPin = 1;
-  int redPin = 0;
+void setServerNStatus(byte state, unsigned int serverNumber) {
+  unsigned int greenPin;
+  unsigned int redPin;
   
   switch (serverNumber) {
     case 1:
@@ -236,26 +230,24 @@ void setServerNStatus(byte state, int serverNumber) {
       return;
   }
   
-  
   switch (state) {
-    case B0: //LED_RED_STATE
+    case LED_RED_STATE:
       digitalWrite(greenPin, LOW);
       digitalWrite(redPin, HIGH);
       break;
-    case B1: //LED_GREEN_STATE
+    case LED_GREEN_STATE:
       digitalWrite(greenPin, HIGH);
       digitalWrite(redPin, LOW);
       break;
-    case B10: //LED_OFF_STATE
+    case LED_OFF_STATE:
       digitalWrite(greenPin, LOW);
       digitalWrite(redPin, LOW);
       break;
-    default: 
-      // if nothing else matches, do the default
-      // default is optional
+    default:
       Serial.println("Invalid state passed to setServerNStatus");
       Serial.println(state);
       Serial.println(serverNumber);
       return;
   }
+  
 }

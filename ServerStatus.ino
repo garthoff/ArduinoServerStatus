@@ -6,6 +6,7 @@
 #include <SPI.h>
 #include <Ethernet.h>
 
+// --- START CONFIG --- 
 // Enter a MAC address for your controller below.
 // Newer Ethernet shields have a MAC address printed on a sticker on the shield
 byte mac[] = {  0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
@@ -19,47 +20,49 @@ char* servers[] = {"arduino.cc",
 char* serverUrlPaths[] = {"/en/Main/FAQ",
                           "/",
                           "/"};
+                          
+#define server1RedPin   2
+#define server1GreenPin 3
+#define server2RedPin   4
+#define server2GreenPin 5
+#define server3RedPin   6
+#define server3GreenPin 7
+
+// --- END CONFIG ---
 
 // Initialize the Ethernet client library
 // with the IP address and port of the server 
 // that you want to connect to (port 80 is default for HTTP):
 EthernetClient client;
 
-int server1RedPin = 2;
-int server1GreenPin = 3;
-
-int server2RedPin = 4;
-int server2GreenPin = 5;
-
-int server3RedPin = 6;
-int server3GreenPin = 7;
-
-int numServers = 3;
-
-byte RED_STATE = B0;
-byte GREEN_STATE = B1;
-byte OFF_STATE = B10;
+// reference constants
+#define NUM_SERVERS 3
+#define LED_RED_STATE B0
+#define LED_GREEN_STATE B1
+#define LED_OFF_STATE B10
 
 // state
-int startServer = 1;
-int currentServer;
+unsigned int startServer = 1;
+unsigned int currentServer;
 
 // http state
 int lastHTTPStatusCode = -1;
 int cHTTPCharInLinePosition = 0;
-int HTTPCharReadPerLineLimit = 15;
+unsigned int HTTPCharReadPerLineLimit = 15;
 String lastLineString = "000000000000000";
 
 void setup() {
   // setup the leds
   pinMode(server1GreenPin, OUTPUT);
   pinMode(server1RedPin, OUTPUT);
+  
   pinMode(server2GreenPin, OUTPUT);
   pinMode(server2RedPin, OUTPUT);
+  
   pinMode(server3GreenPin, OUTPUT);
   pinMode(server3RedPin, OUTPUT);
   
-  setAllLEDsOFF();
+  setAllServersToStatus(LED_OFF_STATE);
   
   // init vars
   currentServer = startServer;
@@ -71,15 +74,18 @@ void setup() {
     Serial.println("Failed to configure Ethernet using DHCP");
     
     // update ui
-    setAllLEDsRed();
+    setAllServersToStatus(LED_RED_STATE);
     
-    // no point in carrying on, so do nothing forevermore:
+    // fail
     for(;;)
       ;
   }
-  // give the Ethernet shield a second to initialize:
-  delay(10000);
-  Serial.println("Startup complete ...");
+  // give the ethernet shield time to initialize
+  int waitTimeForComponentsToStartMs = 1000;
+  delay(waitTimeForComponentsToStartMs);
+  Serial.println();
+  Serial.print(waitTimeForComponentsToStartMs);
+  Serial.println("ms startup wait time elapsed");
   
   setupServerNRequest(currentServer);
 }
@@ -98,35 +104,29 @@ void setupServerNRequest(int serverNumber) {
     case 3:
       serversIndex = 2;
       break;
-    default: 
-      // if nothing else matches, do the default
-      // default is optional
+    default:
       Serial.println("Invalid server passed to setupServerNRequest");
       Serial.println(serverNumber);
       return;
   }
   
-  // if you get a connection, report back via serial:
   if (client.connect(servers[serversIndex], 80)) {
     Serial.print("Connected to Server ");
-    Serial.print(serverNumber);
-    Serial.println();
+    Serial.println(serverNumber);
     
     Serial.println("Sending GET package");
     
-    // Make a HTTP request:
+    // Make a HTTP request
     client.print("GET ");
     client.print(serverUrlPaths[serversIndex]);
     client.println(" HTTP/1.0");
     client.println();
   } 
   else {
-    // kf you didn't get a connection to the server:
     Serial.print("Server ");
     Serial.print(serverNumber);
-    Serial.print(" connection failed");
-    Serial.println();
-    setServerNStatus(RED_STATE,serverNumber);
+    Serial.println(" connection failed");
+    setServerNStatus(LED_RED_STATE,serverNumber);
   } 
 }
 
@@ -134,33 +134,35 @@ void setupServerNRequest(int serverNumber) {
 
 void loop()
 {
-  // if there are incoming bytes available 
-  // from the server, read them and print them:
+  // bytes from stream available
   if (client.available()) {
     
     char c = client.read();
     Serial.print(c);
 
-    // look for the HTTP status code until it's found
+    // look for the HTTP status code until it's found or there's nothing left to read
     if(lastHTTPStatusCode == -1) {
       
       if(c == '\n' || cHTTPCharInLinePosition == HTTPCharReadPerLineLimit) {
-        if(lastLineString.indexOf("HTTP/1.1 200") > -1)
-          lastHTTPStatusCode = 200;
-        else if(lastLineString.indexOf("HTTP/1.1 404") > -1)
-          lastHTTPStatusCode = 404;
-        else if(lastLineString.indexOf("HTTP/1.1 503") > -1)
-          lastHTTPStatusCode = 503;
         
-        // clear the string?
-        //for(int i = 0; i < HTTPCharReadPerLineLimit; i++)
-        //  lastLineString.setCharAt(cHTTPCharInLinePosition,'0');
+        // Parse HTTP status code - expected format HTTP/d.d ddd.*\n
+        if(lastLineString.indexOf("HTTP/") == 0 && cHTTPCharInLinePosition > 12) {
+            unsigned int httpStatusCodeLength = 3;
+            unsigned int startHTTPCode = 12-httpStatusCodeLength;
+            unsigned int endHTTPCode = 12;
+            String httpCodeStr = lastLineString.substring(startHTTPCode, endHTTPCode);
+            
+            int httpStatusCodeTerminatedCharArrayLength = httpStatusCodeLength+1;
+            char httpStatusChars[httpStatusCodeTerminatedCharArrayLength];
+            httpCodeStr.toCharArray(httpStatusChars, httpStatusCodeTerminatedCharArrayLength);
+            lastHTTPStatusCode = atoi(httpStatusChars);
+        }
         
         cHTTPCharInLinePosition = 0;
       }
       else if(cHTTPCharInLinePosition < HTTPCharReadPerLineLimit) {
         lastLineString.setCharAt(cHTTPCharInLinePosition,c);
-        cHTTPCharInLinePosition++;
+        ++cHTTPCharInLinePosition;
       }
     }
   }
@@ -173,15 +175,13 @@ void loop()
     Serial.print(currentServer);
     Serial.print(" ");
     Serial.print(lastHTTPStatusCode);
-    Serial.print(" HTTP status");
-    Serial.println();
+    Serial.println(" HTTP status");
     
-    // update the status of this server
-    // base on the response code
+    // update server status LED
     if(lastHTTPStatusCode == 200)
-        setServerNStatus(GREEN_STATE,currentServer);
+        setServerNStatus(LED_GREEN_STATE,currentServer);
     else
-        setServerNStatus(RED_STATE,currentServer);
+        setServerNStatus(LED_RED_STATE,currentServer);
     
     // reset parsing state
     cHTTPCharInLinePosition = 0;
@@ -189,17 +189,15 @@ void loop()
     // reset http status code
     lastHTTPStatusCode = -1;
     
-    Serial.println();
-    Serial.println("disconnecting.");
+    Serial.print("disconnecting from server ");
+    Serial.println(currentServer);
     client.stop();
     
     // next server
-    if((currentServer+1) > numServers)
-      currentServer = startServer;
-    else
-      currentServer = currentServer + 1;
+    currentServer = (currentServer + 1) % NUM_SERVERS;
+    currentServer = currentServer == 0 ? 1 : currentServer;   
     
-    // after 60 sec sleep
+    // after delay
     Serial.println("Sleep...");
     delay(60000);
     Serial.println("Awake...");
@@ -207,14 +205,9 @@ void loop()
   }
 }
 
-void setAllLEDsRed() {
-  for(int i = 1; i < numServers+1; i++)
-    setServerNStatus(RED_STATE,i);
-}
-
-void setAllLEDsOFF() {
-  for(int i = 1; i < numServers+1; i++)
-    setServerNStatus(OFF_STATE,i);
+void setAllServersToStatus(byte state) {
+    for(int i = 1; i < NUM_SERVERS+1; i++)
+      setServerNStatus(state,i);
 }
 
 void setServerNStatus(byte state, int serverNumber) {
@@ -245,15 +238,15 @@ void setServerNStatus(byte state, int serverNumber) {
   
   
   switch (state) {
-    case B0: //RED_STATE
+    case B0: //LED_RED_STATE
       digitalWrite(greenPin, LOW);
       digitalWrite(redPin, HIGH);
       break;
-    case B1: //GREEN_STATE
+    case B1: //LED_GREEN_STATE
       digitalWrite(greenPin, HIGH);
       digitalWrite(redPin, LOW);
       break;
-    case B10: //OFF_STATE
+    case B10: //LED_OFF_STATE
       digitalWrite(greenPin, LOW);
       digitalWrite(redPin, LOW);
       break;

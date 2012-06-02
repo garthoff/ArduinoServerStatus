@@ -16,7 +16,10 @@ char* servers[] = {"arduino.cc",
                    "sparkfun.com", 
                    "google.com"};
 
-// paths on hosts                 
+// server ports
+int serverPorts[] = {80, 80, 80};
+
+// paths on server hosts                 
 char* serverUrlPaths[] = {"/en/Main/FAQ",
                           "/",
                           "/"};
@@ -102,7 +105,7 @@ void setupServerNRequest(int serverNumber) {
   
   int serversIndex = serverNumber - 1;
   
-  if (client.connect(servers[serversIndex], 80)) {
+  if (client.connect(servers[serversIndex], serverPorts[serversIndex])) {
     Serial.print("Connected to Server ");
     Serial.println(serverNumber);
     
@@ -144,7 +147,7 @@ void loop()
             unsigned int endHTTPCode = 12;
             String httpCodeStr = lastLineString.substring(startHTTPCode, endHTTPCode);
             
-            int httpStatusCodeTerminatedCharArrayLength = httpStatusCodeLength+1;
+            unsigned int httpStatusCodeTerminatedCharArrayLength = httpStatusCodeLength+1;
             char httpStatusChars[httpStatusCodeTerminatedCharArrayLength];
             httpCodeStr.toCharArray(httpStatusChars, httpStatusCodeTerminatedCharArrayLength);
             lastHTTPStatusCode = atoi(httpStatusChars);
@@ -186,7 +189,7 @@ void loop()
     client.stop();
     
     // next server
-    currentServer = (currentServer + 1) % (NUM_SERVERS+1);
+    currentServer = (currentServer + 1) % (NUM_SERVERS + 1);
     currentServer = currentServer == 0 ? 1 : currentServer;   
     
     // after delay

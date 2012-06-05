@@ -31,7 +31,7 @@ char* serverUrlPaths[] = {"/en/Main/FAQ",
 #define server3RedPin   6
 #define server3GreenPin 7
 
-unsigned int sleepTimeBetweenServerConnectionsMs = 60*1000;
+int sleepTimeBetweenServerConnectionsMs = 60*1000;
 
 // --- END CONFIG ---
 
@@ -48,13 +48,13 @@ EthernetClient client;
 #define LED_OFF_STATE B10
 
 // state
-unsigned int startServer = 1;
-unsigned int currentServer;
+int startServer = 1;
+int currentServer;
 
 // http state
 int lastHTTPStatusCode = -1;
 int cHTTPCharInLinePosition = 0;
-unsigned int HTTPCharReadPerLineLimit = 15;
+int HTTPCharReadPerLineLimit = 15;
 String lastLineString = "000000000000000";
 
 void setup() {
@@ -142,12 +142,12 @@ void loop()
         
         // Parse HTTP status code - expected format HTTP/... ddd.*\n
         if(lastLineString.indexOf("HTTP/") == 0 && cHTTPCharInLinePosition > 12) {
-            unsigned int httpStatusCodeLength = 3;
-            unsigned int startHTTPCode = 12-httpStatusCodeLength;
-            unsigned int endHTTPCode = 12;
+            int httpStatusCodeLength = 3;
+            int startHTTPCode = 12-httpStatusCodeLength;
+            int endHTTPCode = 12;
             String httpCodeStr = lastLineString.substring(startHTTPCode, endHTTPCode);
             
-            unsigned int httpStatusCodeTerminatedCharArrayLength = httpStatusCodeLength+1;
+            int httpStatusCodeTerminatedCharArrayLength = httpStatusCodeLength+1;
             char httpStatusChars[httpStatusCodeTerminatedCharArrayLength];
             httpCodeStr.toCharArray(httpStatusChars, httpStatusCodeTerminatedCharArrayLength);
             lastHTTPStatusCode = atoi(httpStatusChars);
@@ -211,9 +211,9 @@ void setAllServersToStatus(byte state) {
       setServerNStatus(state,i);
 }
 
-void setServerNStatus(byte state, unsigned int serverNumber) {
-  unsigned int greenPin;
-  unsigned int redPin;
+void setServerNStatus(byte state, int serverNumber) {
+  int greenPin;
+  int redPin;
   
   switch (serverNumber) {
     case 1:

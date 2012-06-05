@@ -31,7 +31,7 @@ char* serverUrlPaths[] = {"/en/Main/FAQ",
 #define server3RedPin   6
 #define server3GreenPin 7
 
-unsigned int sleepTimeBetweenServerConnectionsMs = 60000;
+unsigned int sleepTimeBetweenServerConnectionsMs = 60*1000;
 
 // --- END CONFIG ---
 
@@ -188,17 +188,21 @@ void loop()
     Serial.println(currentServer);
     client.stop();
     
+    // sleep only if we've connected to all servers
+    boolean shouldSleep = currentServer == NUM_SERVERS;
+    
     // next server
     currentServer = (currentServer + 1) % (NUM_SERVERS + 1);
     currentServer = currentServer == 0 ? 1 : currentServer;   
     
     // after delay
-    Serial.print("Sleeping ");
-    Serial.print(sleepTimeBetweenServerConnectionsMs);
-    Serial.println("ms ...");
-    delay(sleepTimeBetweenServerConnectionsMs);
-    Serial.println("... Awake");
-    setupServerNRequest(currentServer);
+    if(shouldSleep) {
+      Serial.print("Sleeping ");
+      Serial.print(sleepTimeBetweenServerConnectionsMs);
+      Serial.println("ms ...");
+      delay(sleepTimeBetweenServerConnectionsMs);
+      Serial.println("... Awake");
+    }
   }
 }
 

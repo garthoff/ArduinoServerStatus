@@ -24,17 +24,6 @@ char* serverUrlPaths[] = {"/en/Main/FAQ",
                           "/",
                           "/"};
 
-#define server1RedPin   2
-#define server1GreenPin 3
-#define server2RedPin   5
-#define server2GreenPin 6
-#define server3RedPin   7
-#define server3GreenPin 8
-
-#define sleepTimeBetweenServerConnectionsMs 60000
-
-// --- END CONFIG ---
-
 #define server1RedPin   3
 #define server1GreenPin 2
 #define server2RedPin   6

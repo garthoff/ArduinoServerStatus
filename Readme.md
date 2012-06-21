@@ -1,6 +1,6 @@
 Display up/down status (200 HTTP response code = UP) of 3 servers on 3 green/red LED pairs.
 
-[![](http://farm8.staticflickr.com/7076/7246297858_cc4e21631d_z.jpg)](http://farm8.staticflickr.com/7076/7246297858_cc4e21631d_z.jpg)
+[![](http://farm8.staticflickr.com/7112/7411960850_81fcae7854_c_d.jpg)](http://farm8.staticflickr.com/7112/7411960850_81fcae7854_c_d.jpg)
 
 Parts
 

@@ -26,12 +26,23 @@ char* serverUrlPaths[] = {"/en/Main/FAQ",
 
 #define server1RedPin   2
 #define server1GreenPin 3
-#define server2RedPin   4
+#define server2RedPin   5
+#define server2GreenPin 6
+#define server3RedPin   7
+#define server3GreenPin 8
+
+#define sleepTimeBetweenServerConnectionsMs 60000
+
+// --- END CONFIG ---
+
+#define server1RedPin   3
+#define server1GreenPin 2
+#define server2RedPin   6
 #define server2GreenPin 5
-#define server3RedPin   6
+#define server3RedPin   8
 #define server3GreenPin 7
 
-int sleepTimeBetweenServerConnectionsMs = 60*1000;
+#define sleepTimeBetweenServerConnectionsMs 60000
 
 // --- END CONFIG ---
 
@@ -58,6 +69,7 @@ int HTTPCharReadPerLineLimit = 15;
 String lastLineString = "000000000000000";
 
 void setup() {
+  
   // setup the leds
   pinMode(server1GreenPin, OUTPUT);
   pinMode(server1RedPin, OUTPUT);
@@ -86,6 +98,7 @@ void setup() {
     for(;;)
       ;
   }
+  
   // give the ethernet shield time to initialize
   int waitTimeForComponentsToStartMs = 1000;
   delay(waitTimeForComponentsToStartMs);
@@ -125,11 +138,9 @@ void setupServerNRequest(int serverNumber) {
   } 
 }
 
-
-
 void loop()
 {
-  // bytes from stream available
+  // bytes from recieve stream available
   if (client.available()) {
     
     char c = client.read();
@@ -203,6 +214,8 @@ void loop()
       delay(sleepTimeBetweenServerConnectionsMs);
       Serial.println("... Awake");
     }
+    
+    setupServerNRequest(currentServer);
   }
 }
 
@@ -228,9 +241,7 @@ void setServerNStatus(byte state, int serverNumber) {
       greenPin = server3GreenPin;
       redPin = server3RedPin;
       break;
-    default: 
-      // if nothing else matches, do the default
-      // default is optional
+    default:
       Serial.println("Invalid server passed to setServerNStatus");
       Serial.println(state);
       Serial.println(serverNumber);

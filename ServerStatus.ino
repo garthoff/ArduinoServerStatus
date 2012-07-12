@@ -24,8 +24,6 @@ char* serverUrlPaths[] = {"/en/Main/FAQ",
                           "/"};
 // --- END Server config ---
 
-// --- END Server config ---
-
 #define server1RedPin   3
 #define server1GreenPin 2
 #define server2RedPin   6

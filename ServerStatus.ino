@@ -24,6 +24,8 @@ char* serverUrlPaths[] = {"/en/Main/FAQ",
                           "/"};
 // --- END Server config ---
 
+// --- END Server config ---
+
 #define server1RedPin   3
 #define server1GreenPin 2
 #define server2RedPin   6
@@ -167,7 +169,7 @@ void loop()
     }
   }
 
-  // if the server's disconnected, stop the client:
+  // connection closed
   if (!client.connected()) {
     
     Serial.println();
@@ -197,8 +199,7 @@ void loop()
     boolean shouldSleep = currentServer == NUM_SERVERS;
     
     // next server
-    currentServer = (currentServer + 1) % (NUM_SERVERS + 1);
-    currentServer = currentServer == 0 ? 1 : currentServer;   
+    currentServer = (currentServer % NUM_SERVERS) + 1;
     
     // after delay
     if(shouldSleep) {

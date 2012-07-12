@@ -6,9 +6,8 @@
 #include <SPI.h>
 #include <Ethernet.h>
 
-// --- START CONFIG --- 
-// Enter a MAC address for your controller below.
-// Newer Ethernet shields have a MAC address printed on a sticker on the shield
+// --- START Server config ---
+// Enter MAC address printed on ethernet shield
 byte mac[] = {  0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
 // server hosts
@@ -23,6 +22,7 @@ int serverPorts[] = {80, 80, 80};
 char* serverUrlPaths[] = {"/en/Main/FAQ",
                           "/",
                           "/"};
+// --- END Server config ---
 
 #define server1RedPin   3
 #define server1GreenPin 2
@@ -32,30 +32,27 @@ char* serverUrlPaths[] = {"/en/Main/FAQ",
 #define server3GreenPin 7
 
 #define sleepTimeBetweenServerConnectionsMs 60000
+#define waitTimeForComponentsToStartMs 1000
 
-// --- END CONFIG ---
-
-// Initialize the Ethernet client library
-// with the IP address and port of the server 
-// that you want to connect to (port 80 is default for HTTP):
+// Ethernet client library
 EthernetClient client;
 
 // reference constants
-#define NUM_SERVERS 3
-
 #define LED_RED_STATE B0
 #define LED_GREEN_STATE B1
 #define LED_OFF_STATE B10
 
+#define NUM_SERVERS 3
+
 // state
-int startServer = 1;
+int startServer;
 int currentServer;
 
 // http state
-int lastHTTPStatusCode = -1;
-int cHTTPCharInLinePosition = 0;
-int HTTPCharReadPerLineLimit = 15;
-String lastLineString = "000000000000000";
+int lastHTTPStatusCode;
+int cHTTPCharInLinePosition;
+int HTTPCharReadPerLineLimit;
+String lastLineString;
 
 void setup() {
   
@@ -68,15 +65,21 @@ void setup() {
   
   pinMode(server3GreenPin, OUTPUT);
   pinMode(server3RedPin, OUTPUT);
-  
+    
   setAllServersToStatus(LED_OFF_STATE);
   
   // init vars
+  lastHTTPStatusCode = -1;
+  cHTTPCharInLinePosition = 0;
+  HTTPCharReadPerLineLimit = 15;
+  lastLineString = "000000000000000";
+  startServer = 1;
   currentServer = startServer;
   
-  // start the serial library:
+  // start the serial library
   Serial.begin(9600);
-  // start the Ethernet connection:
+  
+  // start the ethernet connection
   if (Ethernet.begin(mac) == 0) {
     Serial.println("Failed to configure Ethernet using DHCP");
     
@@ -89,7 +92,6 @@ void setup() {
   }
   
   // give the ethernet shield time to initialize
-  int waitTimeForComponentsToStartMs = 1000;
   delay(waitTimeForComponentsToStartMs);
   Serial.println();
   Serial.print(waitTimeForComponentsToStartMs);
@@ -105,6 +107,8 @@ void setupServerNRequest(int serverNumber) {
       return;
   }
   
+  
+  // 0 based index
   int serversIndex = serverNumber - 1;
   
   if (client.connect(servers[serversIndex], serverPorts[serversIndex])) {
@@ -132,6 +136,7 @@ void loop()
   // bytes from recieve stream available
   if (client.available()) {
     
+    // print the server's entire response to the serial connection for debugging
     char c = client.read();
     Serial.print(c);
 
@@ -209,7 +214,7 @@ void loop()
 }
 
 void setAllServersToStatus(byte state) {
-    for(int i = 1; i < NUM_SERVERS+1; i++)
+    for(int i = 1; i <= NUM_SERVERS; i++)
       setServerNStatus(state,i);
 }
 

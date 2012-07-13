@@ -260,5 +260,4 @@ void setServerNStatus(byte state, int serverNumber) {
       Serial.println(serverNumber);
       return;
   }
-  
 }

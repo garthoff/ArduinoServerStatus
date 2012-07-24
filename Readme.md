@@ -8,18 +8,4 @@ http://www.sparkfun.com/wish_lists/45090
 
 Wiring
 
-Digitial Pin
-|
-|
-v
-Resistor
-|
-|
-v
-(long end)
-LED
-(short end)
-|
-|
-v
-Ground (GND)
+Digitial Pin ---- Resistor ---- (long end) LED (short end) --- Ground

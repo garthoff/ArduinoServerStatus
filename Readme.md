@@ -4,13 +4,4 @@ Display up/down status (200 HTTP response code = UP) of 3 servers on 3 green/red
 
 Parts
 
-Arduino Uno
-http://www.sparkfun.com/products/11021
-
-Ethernet shield
-http://www.sparkfun.com/products/9026
-
-Wires
-LEDs
-Resistors
-BreadBoard
+http://www.sparkfun.com/wish_lists/45090

@@ -5,3 +5,21 @@ Display up/down status (200 HTTP response code = UP) of 3 servers on 3 green/red
 Parts
 
 http://www.sparkfun.com/wish_lists/45090
+
+Wiring
+
+Digitial Pin
+|
+|
+v
+Resistor
+|
+|
+v
+(long end)
+LED
+(short end)
+|
+|
+v
+Ground (GND)

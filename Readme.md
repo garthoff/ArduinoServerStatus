@@ -9,3 +9,7 @@ http://www.sparkfun.com/wish_lists/45090
 Wiring
 
 Digitial Pin ---- Resistor ---- (long end) LED (short end) --- Ground
+
+----
+
+If you successfully make this project, take a photo and send it to me! It will encourage me to continue development.

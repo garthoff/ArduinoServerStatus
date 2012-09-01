@@ -2,7 +2,7 @@ Display up/down status (200 HTTP response code = UP) of 3 servers on 3 green/red
 
 [![](http://farm8.staticflickr.com/7112/7411960850_81fcae7854_c_d.jpg)](http://farm8.staticflickr.com/7112/7411960850_81fcae7854_c_d.jpg)
 
-Parts
+Parts (No soldering required)
 
 https://www.sparkfun.com/wish_lists/47235
 

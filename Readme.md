@@ -4,7 +4,7 @@ Display up/down status (200 HTTP response code = UP) of 3 servers on 3 green/red
 
 Parts
 
-http://www.sparkfun.com/wish_lists/45090
+https://www.sparkfun.com/wish_lists/47235
 
 Wiring
 

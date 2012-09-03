@@ -340,7 +340,7 @@ void softReset() {
     // enable watchdog with short timeout on inactivity
     wdt_enable(WDTO_15MS);
 
-    // do nothing until watchdog resets us
+    // do nothing so the watchdog will resets us
     for(;;){
     }
 }

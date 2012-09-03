@@ -34,11 +34,6 @@ char* serverUrlPaths[] = {"/en/Main/FAQ",
 #define sleepTimeBetweenServerConnectionsMs 60000
 #define serialPrintHttpResponse 0
 
-// Initialize the Ethernet client library
-// with the IP address and port of the server
-// that you want to connect to (port 80 is default for HTTP):
-EthernetClient client;
-
 // enables software reboot
 #define onErrorSleepTimeBeforeSoftResetting 60000
 void wdt_init(void) __attribute__((naked)) __attribute__((section(".init3")));
@@ -59,11 +54,12 @@ boolean sendNextExternalClientRequest;
 int currentServer;
 unsigned long nextExternalServersCheckMili;
 int retrieve_server_status_watchdog_counter;
-const int serverStatusWatchDogLength = NUM_SERVERS*5; // reset after 1 round of no connection errors
+const int serverStatusWatchDogLength = NUM_SERVERS*5;
 int serverStatusWatchdog[serverStatusWatchDogLength];
 int cServerStatusWatchDogIndex;
 
 // http state
+EthernetClient client;
 int lastHTTPStatusCode;
 int cHTTPCharInLinePosition;
 int HTTPCharReadPerLineLimit;
@@ -92,8 +88,8 @@ void setup() {
   cHTTPCharInLinePosition = 0;
   HTTPCharReadPerLineLimit = 15;
   lastLineString = "000000000000000";
-  // reset the arduino if we get 10 rounds of failure in a row
-  // init the state to all 200's
+
+  // init the state tracking watchdog array to all success responses
   cServerStatusWatchDogIndex = 0;
   for(int i = 0; i < serverStatusWatchDogLength; i++) {
       serverStatusWatchdog[i] = 200;
@@ -106,7 +102,7 @@ void setup() {
   // init display state
   setAllServersToStatus(LED_OFF_STATE);
 
-  // start the Ethernet connection:
+  // start the Ethernet connection
   if (Ethernet.begin(mac) == 0) {
     Serial.println("Failed to configure Ethernet using DHCP");
 
